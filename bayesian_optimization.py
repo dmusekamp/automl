@@ -14,7 +14,7 @@ def plot(iteration, min_x, max_x, data_x, data_y, gpr, num_points=50, log_scale=
     :param max_x: upper input bound
     :param data_x: list of all previous input points
     :param data_y: list of all previous output points
-    :param gpr: Gaussian process
+    :param gpr: Gaussian Process
     :param num_points: number of points to plot
     :param log_scale: whether the log-scale was used for the input space
     """
@@ -54,7 +54,7 @@ def expected_improvement(x, current_min, gpr):
 
     :param x: candidate point
     :param current_min: min
-    :param gpr: Gaussian process
+    :param gpr: Gaussian Process
     """
     x = np.reshape(x, [len(x), -1])
     mean, std = gpr.predict(x, return_std=True)
@@ -65,7 +65,7 @@ def expected_improvement(x, current_min, gpr):
 def get_query(gpr, min_x, max_x,  data_y, n=50):
     """ Returns the minimum of the expected improvement acquisition function.
 
-    :param gpr: Gaussian process
+    :param gpr: Gaussian Process
     :param min_x: lower input bound
     :param max_x: upper input bound
     :param data_y: list of all previous output samples
@@ -85,7 +85,7 @@ def get_query(gpr, min_x, max_x,  data_y, n=50):
 
 
 def bayesian_optimization(initial_x, min_x, max_x, num_iter, model_wrapper, log_scale=True):
-    """ Runs the Bayesian optimization.
+    """ Runs the Bayesian Optimization.
 
     :param initial_x: initial guess
     :param min_x: lower input bound
@@ -124,6 +124,6 @@ def bayesian_optimization(initial_x, min_x, max_x, num_iter, model_wrapper, log_
 
 if __name__ == "__main__":
     train_loader, test_loader = get_fashion_mnist(32)
-    wrapper = TrainWrapper(train_loader, test_loader, 10, epochs=1)
+    wrapper = TrainWrapper(train_loader, test_loader, 10, epochs=5)
     bayesian_optimization(0.001, 0.0001, 1, 10, wrapper)
 
