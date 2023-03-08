@@ -62,22 +62,20 @@ def expected_improvement(x, current_min, gpr):
     return std * (gamma * norm.cdf(gamma) + norm.pdf(gamma))
 
 
-def get_query(gpr, min_x, max_x,  data_y, n=50):
-    """ Returns the minimum of the expected improvement acquisition function.
+def minimize_with_restarts(fun, min_x, max_x, n=50):
+    """ Wrapper around the scipy minimize function to allow random restarts.
 
-    :param gpr: Gaussian Process
+    :param fun: function to minimize
     :param min_x: lower input bound
     :param max_x: upper input bound
-    :param data_y: list of all previous output samples
     :param n: number of random restarts of the optimization process
-    :return: optimum of the acquisition function
+    :return: minimum
     """
     current_min_x = None
     current_min_y = np.inf
     for i in range(n):
         x_O = np.random.uniform(min_x, max_x)
-        res = minimize(lambda x: -expected_improvement(x, np.min(data_y), gpr), x_O, method='L-BFGS-B',
-                        bounds=[(min_x, max_x), ])
+        res = minimize(fun, x_O, method='L-BFGS-B', bounds=[(min_x, max_x),])
         if res.fun < current_min_y:
             current_min_x = res.x
             current_min_y = res.fun
@@ -107,23 +105,27 @@ def bayesian_optimization(initial_x, min_x, max_x, num_iter, model_wrapper, log_
         if i == 0:
             query_x = np.array([initial_x,])
         else:
-            query_x = get_query(gpr, min_x, max_x, data_y)
+            query_x = minimize_with_restarts(lambda x: -expected_improvement(x, np.min(data_y), gpr), min_x, max_x)
         print("\nBO iteration " + str(i), "query_lr:", np.exp(query_x) if log_scale else query_x)
         if log_scale:
             query_y = model_wrapper.eval(np.exp(query_x))
         else:
             query_y = model_wrapper.eval(query_x)
-
         data_x.append(query_x)
         data_y.append(query_y)
+
         gpr = GaussianProcessRegressor(random_state=0).fit(np.reshape(data_x, [len(data_x), -1]), data_y)
         if i > 0:
             plot(i, min_x, max_x, data_x, data_y, gpr, log_scale=log_scale)
+
+        current_best = minimize_with_restarts(lambda x:  gpr.predict(np.reshape(x, [len(x), -1])), min_x, max_x)
+        print("Current best learning rate estimate:",  np.exp(current_best) if log_scale else query_x)
+
     plt.show()
 
 
 if __name__ == "__main__":
     train_loader, test_loader = get_fashion_mnist(32)
-    wrapper = TrainWrapper(train_loader, test_loader, 10, epochs=5)
+    wrapper = TrainWrapper(train_loader, test_loader, 10, epochs=1)
     bayesian_optimization(0.001, 0.0001, 1, 10, wrapper)
 
