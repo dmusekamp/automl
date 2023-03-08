@@ -126,6 +126,6 @@ def bayesian_optimization(initial_x, min_x, max_x, num_iter, model_wrapper, log_
 
 if __name__ == "__main__":
     train_loader, test_loader = get_fashion_mnist(32)
-    wrapper = TrainWrapper(train_loader, test_loader, 10, epochs=1)
+    wrapper = TrainWrapper(train_loader, test_loader, 10, epochs=5)
     bayesian_optimization(0.001, 0.0001, 1, 10, wrapper)
 
