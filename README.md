@@ -1,4 +1,4 @@
-# Find best learning rate on fashion mnist using Bayesian Optimization
+# Find best learning rate on fashion-mnist using Bayesian Optimization
 
 ## Installation
 ```
